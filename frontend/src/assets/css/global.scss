@@ -1,0 +1,400 @@
+@import './variables';
+
+// ===================================
+// Reset & Base
+// ===================================
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: $font-family;
+  font-size: $font-size-base;
+  color: $gray-800;
+  background-color: $gray-100;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+// ===================================
+// Layout
+// ===================================
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: margin-left $transition-base;
+}
+
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background-color: $gray-100;
+}
+
+// ===================================
+// Page Header
+// ===================================
+.page-header {
+  margin-bottom: 24px;
+
+  .page-title {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $primary;
+    margin-bottom: 4px;
+  }
+
+  .page-subtitle {
+    font-size: $font-size-sm;
+    color: $gray-600;
+  }
+
+  .page-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+}
+
+// ===================================
+// Cards
+// ===================================
+.card {
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: $shadow-sm;
+  padding: 20px;
+  border: 1px solid $gray-200;
+
+  &.card-primary {
+    border-left: 4px solid $primary;
+  }
+
+  &.card-danger {
+    border-left: 4px solid $status-high;
+  }
+
+  &.card-warning {
+    border-left: 4px solid $status-medium;
+  }
+
+  &.card-success {
+    border-left: 4px solid $status-low;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid $gray-200;
+
+    .card-title {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $gray-800;
+    }
+  }
+}
+
+// ===================================
+// Stat Cards
+// ===================================
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: $border-radius;
+  padding: 20px;
+  box-shadow: $shadow-sm;
+  border: 1px solid $gray-200;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: $border-radius;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+
+    &.icon-primary { background: rgba($primary, 0.1); color: $primary; }
+    &.icon-danger { background: rgba($status-high, 0.1); color: $status-high; }
+    &.icon-warning { background: rgba($status-medium, 0.1); color: $status-medium; }
+    &.icon-success { background: rgba($status-low, 0.1); color: $status-low; }
+    &.icon-info { background: rgba($status-info, 0.1); color: $status-info; }
+    &.icon-purple { background: rgba(#8e44ad, 0.1); color: #8e44ad; }
+  }
+
+  .stat-info {
+    flex: 1;
+
+    .stat-label {
+      font-size: $font-size-sm;
+      color: $gray-600;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 700;
+      color: $gray-900;
+      line-height: 1;
+    }
+
+    .stat-change {
+      font-size: $font-size-xs;
+      margin-top: 4px;
+
+      &.up { color: $status-high; }
+      &.down { color: $status-low; }
+      &.neutral { color: $gray-500; }
+    }
+  }
+}
+
+// ===================================
+// Status Badges
+// ===================================
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: $font-size-xs;
+  font-weight: 600;
+
+  &.badge-critical { background: rgba($risk-critical, 0.12); color: $risk-critical; }
+  &.badge-high { background: rgba($risk-high, 0.12); color: $risk-high; }
+  &.badge-medium { background: rgba($risk-medium, 0.12); color: darken($risk-medium, 15%); }
+  &.badge-low { background: rgba($risk-low, 0.12); color: darken($risk-low, 10%); }
+  &.badge-minimal { background: rgba($risk-minimal, 0.15); color: $gray-600; }
+
+  &.badge-effective { background: rgba($ctrl-effective, 0.12); color: darken($ctrl-effective, 10%); }
+  &.badge-partial { background: rgba($ctrl-partial, 0.12); color: darken($ctrl-partial, 15%); }
+  &.badge-ineffective { background: rgba($ctrl-ineffective, 0.12); color: $ctrl-ineffective; }
+  &.badge-not-tested { background: rgba($gray-400, 0.2); color: $gray-600; }
+
+  &.badge-primary { background: rgba($primary, 0.1); color: $primary; }
+  &.badge-info { background: rgba($status-info, 0.1); color: darken($status-info, 10%); }
+}
+
+// ===================================
+// COSO Framework Indicators
+// ===================================
+.coso-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: $font-size-xs;
+  font-weight: 600;
+
+  &.coso-env { background: rgba($coso-env, 0.12); color: $coso-env; }
+  &.coso-risk { background: rgba($coso-risk, 0.12); color: $coso-risk; }
+  &.coso-control { background: rgba($coso-control, 0.12); color: darken($coso-control, 10%); }
+  &.coso-info { background: rgba($coso-info, 0.12); color: $coso-info; }
+  &.coso-monitor { background: rgba($coso-monitor, 0.12); color: darken($coso-monitor, 15%); }
+}
+
+// ===================================
+// COSO Progress
+// ===================================
+.progress-bar {
+  height: 8px;
+  background: $gray-200;
+  border-radius: 4px;
+  overflow: hidden;
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+
+    &.fill-primary { background: $primary; }
+    &.fill-danger { background: $status-high; }
+    &.fill-warning { background: $status-medium; }
+    &.fill-success { background: $status-low; }
+    &.fill-info { background: $status-info; }
+  }
+}
+
+// ===================================
+// Grid Layouts
+// ===================================
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ===================================
+// Section
+// ===================================
+.section {
+  margin-bottom: 28px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+
+    .section-title {
+      font-size: $font-size-xl;
+      font-weight: 600;
+      color: $gray-800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &::before {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 20px;
+        background: $primary;
+        border-radius: 2px;
+      }
+    }
+  }
+}
+
+// ===================================
+// DevExtreme Overrides
+// ===================================
+.dx-widget {
+  font-family: $font-family !important;
+  font-size: $font-size-base !important;
+}
+
+.dx-datagrid {
+  border-radius: $border-radius;
+  border: 1px solid $gray-200 !important;
+  box-shadow: $shadow-sm;
+
+  .dx-datagrid-header-panel {
+    padding: 12px 16px;
+    background: white;
+    border-bottom: 1px solid $gray-200;
+  }
+
+  .dx-datagrid-headers {
+    background: $gray-50;
+
+    .dx-header-row td {
+      font-weight: 600;
+      color: $gray-700;
+      font-size: $font-size-sm;
+    }
+  }
+
+  .dx-row:hover td {
+    background-color: rgba($primary, 0.03) !important;
+  }
+}
+
+.dx-button {
+  border-radius: $border-radius-sm !important;
+  font-family: $font-family !important;
+}
+
+.dx-button.dx-button-default {
+  background-color: $primary !important;
+  border-color: $primary !important;
+}
+
+.dx-chart {
+  font-family: $font-family !important;
+}
+
+// ===================================
+// Scrollbar
+// ===================================
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: $gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $gray-400;
+  border-radius: 3px;
+
+  &:hover {
+    background: $gray-500;
+  }
+}
+
+// ===================================
+// Utilities
+// ===================================
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.text-muted { color: $gray-600; }
+.text-primary { color: $primary; }
+.text-danger { color: $status-high; }
+.text-warning { color: $status-medium; }
+.text-success { color: $status-low; }
+.fw-bold { font-weight: 700; }
+.fw-semibold { font-weight: 600; }
+.mt-auto { margin-top: auto; }
+.mb-0 { margin-bottom: 0; }
+.d-flex { display: flex; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.gap-16 { gap: 16px; }

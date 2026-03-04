@@ -1,0 +1,25 @@
+{
+  "name": "itgc-portal",
+  "version": "1.0.0",
+  "description": "그룹사 ITGC 포털 - COSO 기반 위험관리 및 운영평가 시스템",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0",
+    "pinia": "^2.1.7",
+    "devextreme": "^24.1.0",
+    "devextreme-vue": "^24.1.0",
+    "axios": "^1.6.0",
+    "dayjs": "^1.11.10",
+    "@vueuse/core": "^10.7.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0",
+    "sass": "^1.70.0"
+  }
+}

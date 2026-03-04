@@ -1,0 +1,77 @@
+// ===================================
+// ITGC 포털 디자인 변수
+// ===================================
+
+// Primary Colors
+$primary: #1a3a6b;
+$primary-light: #2d5aa0;
+$primary-dark: #0f2448;
+$secondary: #0e6b7a;
+$accent: #e8a020;
+
+// COSO Framework Colors
+$coso-env: #4a6fa5;      // 통제 환경
+$coso-risk: #c0392b;     // 위험 평가
+$coso-control: #27ae60;  // 통제 활동
+$coso-info: #8e44ad;     // 정보 및 의사소통
+$coso-monitor: #e67e22;  // 모니터링
+
+// Status Colors
+$status-high: #e74c3c;
+$status-medium: #f39c12;
+$status-low: #27ae60;
+$status-info: #3498db;
+
+// Risk Level Colors
+$risk-critical: #8b0000;
+$risk-high: #e74c3c;
+$risk-medium: #f39c12;
+$risk-low: #27ae60;
+$risk-minimal: #95a5a6;
+
+// Control Status
+$ctrl-effective: #27ae60;
+$ctrl-partial: #f39c12;
+$ctrl-ineffective: #e74c3c;
+$ctrl-not-tested: #95a5a6;
+
+// Neutral Colors
+$gray-50: #f8f9fa;
+$gray-100: #f1f3f5;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #868e96;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+
+// Layout
+$sidebar-width: 260px;
+$sidebar-collapsed-width: 64px;
+$header-height: 60px;
+$border-radius: 8px;
+$border-radius-sm: 4px;
+$border-radius-lg: 12px;
+
+// Shadows
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+// Typography
+$font-family: 'Noto Sans KR', sans-serif;
+$font-size-xs: 11px;
+$font-size-sm: 12px;
+$font-size-base: 14px;
+$font-size-md: 15px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
+$font-size-2xl: 20px;
+$font-size-3xl: 24px;
+
+// Transitions
+$transition-fast: 0.15s ease;
+$transition-base: 0.25s ease;
+$transition-slow: 0.35s ease;
