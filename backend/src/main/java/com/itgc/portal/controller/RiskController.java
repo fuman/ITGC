@@ -1,7 +1,7 @@
 package com.itgc.portal.controller;
 
 import com.itgc.portal.common.ApiResponse;
-import com.itgc.portal.entity.Risk;
+import com.itgc.portal.model.Risk;
 import com.itgc.portal.service.RiskService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

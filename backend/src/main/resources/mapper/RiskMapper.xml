@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.RiskMapper">
+
+    <resultMap id="RiskResultMap" type="Risk">
+        <id property="id" column="id"/>
+        <result property="riskCode" column="risk_code"/>
+        <result property="category" column="category"/>
+        <result property="riskName" column="risk_name"/>
+        <result property="riskDescription" column="risk_description"/>
+        <result property="inherentLikelihood" column="inherent_likelihood"/>
+        <result property="inherentImpact" column="inherent_impact"/>
+        <result property="inherentScore" column="inherent_score"/>
+        <result property="inherentRisk" column="inherent_risk"/>
+        <result property="residualLikelihood" column="residual_likelihood"/>
+        <result property="residualImpact" column="residual_impact"/>
+        <result property="residualScore" column="residual_score"/>
+        <result property="residualRisk" column="residual_risk"/>
+        <result property="riskOwner" column="risk_owner"/>
+        <result property="dept" column="dept"/>
+        <result property="status" column="status"/>
+        <result property="relatedProcess" column="related_process"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, risk_code, category, risk_name, risk_description,
+        inherent_likelihood, inherent_impact, inherent_score, inherent_risk,
+        residual_likelihood, residual_impact, residual_score, residual_risk,
+        risk_owner, dept, status, related_process,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findAll" resultMap="RiskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_risk
+        <where>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="level != null and level != ''">
+                AND inherent_risk = #{level}
+            </if>
+            <if test="dept != null and dept != ''">
+                AND dept ILIKE '%' || #{dept} || '%'
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY risk_code
+    </select>
+
+    <select id="findById" resultMap="RiskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_risk
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByRiskCode" resultMap="RiskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_risk
+        WHERE risk_code = #{riskCode}
+    </select>
+
+    <select id="countByRiskCode" resultType="int">
+        SELECT COUNT(1) FROM itgc_risk WHERE risk_code = #{riskCode}
+    </select>
+
+    <insert id="insert" parameterType="Risk" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_risk (
+            risk_code, category, risk_name, risk_description,
+            inherent_likelihood, inherent_impact,
+            residual_likelihood, residual_impact,
+            risk_owner, dept, status, related_process,
+            created_by, updated_by
+        ) VALUES (
+            #{riskCode}, #{category}, #{riskName}, #{riskDescription},
+            #{inherentLikelihood}, #{inherentImpact},
+            #{residualLikelihood}, #{residualImpact},
+            #{riskOwner}, #{dept}, #{status}, #{relatedProcess},
+            #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update" parameterType="Risk">
+        UPDATE itgc_risk SET
+            category            = #{category},
+            risk_name           = #{riskName},
+            risk_description    = #{riskDescription},
+            inherent_likelihood = #{inherentLikelihood},
+            inherent_impact     = #{inherentImpact},
+            residual_likelihood = #{residualLikelihood},
+            residual_impact     = #{residualImpact},
+            risk_owner          = #{riskOwner},
+            dept                = #{dept},
+            status              = #{status},
+            related_process     = #{relatedProcess},
+            updated_by          = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM itgc_risk WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM itgc_risk
+    </select>
+
+    <select id="countByInherentRisk" resultType="long">
+        SELECT COUNT(1) FROM itgc_risk WHERE inherent_risk = #{inherentRisk}
+    </select>
+
+    <select id="findForMatrix" resultMap="RiskResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_risk
+        <where>
+            <if test="type == 'inherent'">
+                inherent_likelihood IS NOT NULL AND inherent_impact IS NOT NULL
+            </if>
+            <if test="type == 'residual'">
+                residual_likelihood IS NOT NULL AND residual_impact IS NOT NULL
+            </if>
+        </where>
+        ORDER BY inherent_score DESC
+    </select>
+
+    <select id="getSummaryByCategory" resultType="map">
+        SELECT
+            category,
+            COUNT(*)                                          AS total,
+            SUM(CASE WHEN inherent_risk = '심각' THEN 1 ELSE 0 END) AS critical,
+            SUM(CASE WHEN inherent_risk = '높음' THEN 1 ELSE 0 END) AS high,
+            SUM(CASE WHEN inherent_risk = '중간' THEN 1 ELSE 0 END) AS medium,
+            SUM(CASE WHEN inherent_risk = '낮음' THEN 1 ELSE 0 END) AS low,
+            SUM(CASE WHEN inherent_risk = '미미' THEN 1 ELSE 0 END) AS minimal
+        FROM itgc_risk
+        GROUP BY category
+        ORDER BY category
+    </select>
+
+</mapper>

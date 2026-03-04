@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,47 +20,42 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    /**
-     * 대시보드 종합 현황
-     */
-    @GetMapping
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getDashboard(
-            @RequestParam(defaultValue = "2026") int year,
-            @RequestParam(defaultValue = "1") int quarter
-    ) {
-        Map<String, Object> data = dashboardService.getDashboardData(year, quarter);
-        return ResponseEntity.ok(ApiResponse.success(data));
-    }
-
-    /**
-     * COSO 구성요소별 현황
-     */
-    @GetMapping("/coso-overview")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getCosoOverview(
-            @RequestParam(defaultValue = "2026") int year,
-            @RequestParam(defaultValue = "1") int quarter
-    ) {
-        return ResponseEntity.ok(ApiResponse.success(dashboardService.getCosoOverview(year, quarter)));
-    }
-
-    /**
-     * KPI 통계
-     */
     @GetMapping("/kpi")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getKpi(
-            @RequestParam(defaultValue = "2026") int year,
-            @RequestParam(defaultValue = "1") int quarter
-    ) {
-        return ResponseEntity.ok(ApiResponse.success(dashboardService.getKpiStats(year, quarter)));
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getKpi() {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getKpiSummary()));
     }
 
-    /**
-     * 위험 분포 차트 데이터
-     */
     @GetMapping("/risk-distribution")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> getRiskDistribution(
-            @RequestParam(defaultValue = "2026") int year
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRiskDistribution() {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getRiskDistribution()));
+    }
+
+    @GetMapping("/control-effectiveness")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getControlEffectiveness() {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getControlEffectiveness()));
+    }
+
+    @GetMapping("/eval-trend")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getEvalTrend(
+            @RequestParam(required = false) Integer year
     ) {
-        return ResponseEntity.ok(ApiResponse.success(dashboardService.getRiskDistribution(year)));
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getEvalTrend(year)));
+    }
+
+    @GetMapping("/recent-findings")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getRecentFindings(
+            @RequestParam(defaultValue = "10") int limit
+    ) {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getRecentFindings(limit)));
+    }
+
+    @GetMapping("/coso-scores")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getCosoScores() {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getCosoScores()));
+    }
+
+    @GetMapping("/overdue-findings")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getOverdueFindingsSummary() {
+        return ResponseEntity.ok(ApiResponse.success(dashboardService.getOverdueFindingsSummary()));
     }
 }

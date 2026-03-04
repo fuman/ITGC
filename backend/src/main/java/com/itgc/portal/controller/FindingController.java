@@ -1,7 +1,7 @@
 package com.itgc.portal.controller;
 
 import com.itgc.portal.common.ApiResponse;
-import com.itgc.portal.entity.Finding;
+import com.itgc.portal.model.Finding;
 import com.itgc.portal.service.FindingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

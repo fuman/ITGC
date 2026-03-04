@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.ControlMapper">
+
+    <resultMap id="ControlResultMap" type="Control">
+        <id property="id" column="id"/>
+        <result property="controlCode" column="control_code"/>
+        <result property="domain" column="domain"/>
+        <result property="controlName" column="control_name"/>
+        <result property="controlObjective" column="control_objective"/>
+        <result property="controlDescription" column="control_description"/>
+        <result property="controlType" column="control_type"/>
+        <result property="automation" column="automation"/>
+        <result property="frequency" column="frequency"/>
+        <result property="controlOwner" column="control_owner"/>
+        <result property="dept" column="dept"/>
+        <result property="isKeyControl" column="is_key_control"/>
+        <result property="isItdmControl" column="is_itdm_control"/>
+        <result property="effectiveness" column="effectiveness"/>
+        <result property="designAdequacy" column="design_adequacy"/>
+        <result property="lastTestDate" column="last_test_date"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <resultMap id="MappingResultMap" type="RiskControlMapping">
+        <id property="id" column="id"/>
+        <result property="riskId" column="risk_id"/>
+        <result property="riskCode" column="risk_code"/>
+        <result property="riskName" column="risk_name"/>
+        <result property="controlId" column="control_id"/>
+        <result property="controlCode" column="control_code"/>
+        <result property="controlName" column="control_name"/>
+        <result property="mappingType" column="mapping_type"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, control_code, domain, control_name, control_objective, control_description,
+        control_type, automation, frequency, control_owner, dept,
+        is_key_control, is_itdm_control, effectiveness, design_adequacy, last_test_date,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findAll" resultMap="ControlResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_control
+        <where>
+            <if test="domain != null and domain != ''">
+                AND domain = #{domain}
+            </if>
+            <if test="type != null and type != ''">
+                AND control_type = #{type}
+            </if>
+            <if test="automation != null and automation != ''">
+                AND automation = #{automation}
+            </if>
+            <if test="effectiveness != null and effectiveness != ''">
+                AND effectiveness = #{effectiveness}
+            </if>
+        </where>
+        ORDER BY control_code
+    </select>
+
+    <select id="findById" resultMap="ControlResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_control WHERE id = #{id}
+    </select>
+
+    <select id="findByControlCode" resultMap="ControlResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_control WHERE control_code = #{controlCode}
+    </select>
+
+    <insert id="insert" parameterType="Control" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_control (
+            control_code, domain, control_name, control_objective, control_description,
+            control_type, automation, frequency, control_owner, dept,
+            is_key_control, is_itdm_control, effectiveness, design_adequacy,
+            created_by, updated_by
+        ) VALUES (
+            #{controlCode}, #{domain}, #{controlName}, #{controlObjective}, #{controlDescription},
+            #{controlType}, #{automation}, #{frequency}, #{controlOwner}, #{dept},
+            #{isKeyControl}, #{isItdmControl}, #{effectiveness}, #{designAdequacy},
+            #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update" parameterType="Control">
+        UPDATE itgc_control SET
+            domain              = #{domain},
+            control_name        = #{controlName},
+            control_objective   = #{controlObjective},
+            control_description = #{controlDescription},
+            control_type        = #{controlType},
+            automation          = #{automation},
+            frequency           = #{frequency},
+            control_owner       = #{controlOwner},
+            dept                = #{dept},
+            is_key_control      = #{isKeyControl},
+            is_itdm_control     = #{isItdmControl},
+            effectiveness       = #{effectiveness},
+            design_adequacy     = #{designAdequacy},
+            updated_by          = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateDesignAdequacy">
+        UPDATE itgc_control SET design_adequacy = #{designAdequacy}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM itgc_control WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM itgc_control
+    </select>
+
+    <select id="findControlRiskMapping" resultMap="MappingResultMap">
+        SELECT
+            m.id, m.risk_id, r.risk_code, r.risk_name,
+            m.control_id, c.control_code, c.control_name,
+            m.mapping_type, m.remarks, m.created_at, m.created_by
+        FROM itgc_risk_control_mapping m
+        JOIN itgc_risk    r ON r.id = m.risk_id
+        JOIN itgc_control c ON c.id = m.control_id
+        ORDER BY r.risk_code, c.control_code
+    </select>
+
+    <select id="getDomainSummary" resultType="map">
+        SELECT
+            domain,
+            COUNT(*)                                                                    AS total,
+            SUM(CASE WHEN effectiveness = '효과적'    THEN 1 ELSE 0 END)               AS effective,
+            SUM(CASE WHEN effectiveness = '부분효과적' THEN 1 ELSE 0 END)              AS partial,
+            SUM(CASE WHEN effectiveness = '비효과적'  THEN 1 ELSE 0 END)              AS ineffective,
+            SUM(CASE WHEN is_key_control = TRUE       THEN 1 ELSE 0 END)               AS key_control_count,
+            ROUND(
+                SUM(CASE WHEN effectiveness = '효과적' THEN 1 ELSE 0 END)::NUMERIC
+                / NULLIF(COUNT(*), 0) * 100, 1
+            )                                                                           AS effectiveness_rate
+        FROM itgc_control
+        GROUP BY domain
+        ORDER BY domain
+    </select>
+
+    <insert id="insertMapping" parameterType="RiskControlMapping">
+        INSERT INTO itgc_risk_control_mapping (risk_id, control_id, mapping_type, remarks, created_by)
+        VALUES (#{riskId}, #{controlId}, #{mappingType}, #{remarks}, #{createdBy})
+    </insert>
+
+    <delete id="deleteMapping">
+        DELETE FROM itgc_risk_control_mapping WHERE id = #{id}
+    </delete>
+
+</mapper>

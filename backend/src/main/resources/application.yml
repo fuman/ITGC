@@ -2,32 +2,45 @@ spring:
   application:
     name: itgc-portal
 
-  # Database (개발: H2, 운영: PostgreSQL)
+  # PostgreSQL + HikariCP 설정
   datasource:
-    url: jdbc:h2:mem:itgcdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-
-  jpa:
-    hibernate:
-      ddl-auto: create-drop
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+    url: jdbc:postgresql://localhost:5432/itgcdb
+    driver-class-name: org.postgresql.Driver
+    username: itgc_user
+    password: itgc_password
+    hikari:
+      pool-name: ItgcHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 3
+      idle-timeout: 600000       # 10분
+      connection-timeout: 30000  # 30초
+      max-lifetime: 1800000      # 30분
+      connection-test-query: SELECT 1
+      auto-commit: false
 
   # 파일 업로드
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 100MB
+
+# MyBatis 설정
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.itgc.portal.model
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+    cache-enabled: false
+    use-generated-keys: true
+
+# PageHelper 설정
+pagehelper:
+  helper-dialect: postgresql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
 
 server:
   port: 8080
@@ -50,6 +63,8 @@ logging:
   level:
     com.itgc: DEBUG
     org.springframework.security: DEBUG
+    org.mybatis: DEBUG
+    java.sql.PreparedStatement: DEBUG
 
 ---
 # 운영 환경
@@ -63,10 +78,15 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      pool-name: ItgcHikariPool-Prod
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 600000
+      connection-timeout: 30000
+      max-lifetime: 1800000
 
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+logging:
+  level:
+    com.itgc: INFO
+    org.mybatis: WARN

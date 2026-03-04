@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.FindingMapper">
+
+    <resultMap id="FindingResultMap" type="Finding">
+        <id property="id" column="id"/>
+        <result property="findingNo" column="finding_no"/>
+        <result property="findingType" column="finding_type"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="controlId" column="control_id"/>
+        <result property="riskId" column="risk_id"/>
+        <result property="severity" column="severity"/>
+        <result property="dept" column="dept"/>
+        <result property="owner" column="owner"/>
+        <result property="riskImpact" column="risk_impact"/>
+        <result property="rootCause" column="root_cause"/>
+        <result property="recommendation" column="recommendation"/>
+        <result property="discoveryDate" column="discovery_date"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="completionDate" column="completion_date"/>
+        <result property="status" column="status"/>
+        <result property="remediationProgress" column="remediation_progress"/>
+        <result property="remediationPlan" column="remediation_plan"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, finding_no, finding_type, title, description,
+        control_id, risk_id, severity, dept, owner,
+        risk_impact, root_cause, recommendation,
+        discovery_date, due_date, completion_date,
+        status, remediation_progress, remediation_plan,
+        created_at, updated_at, created_by, updated_by
+    </sql>
+
+    <select id="findAll" resultMap="FindingResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_finding
+        <where>
+            <if test="severity != null and severity != ''">
+                AND severity = #{severity}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="dept != null and dept != ''">
+                AND dept ILIKE '%' || #{dept} || '%'
+            </if>
+            <if test="findingType != null and findingType != ''">
+                AND finding_type = #{findingType}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="findById" resultMap="FindingResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_finding WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="Finding" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_finding (
+            finding_no, finding_type, title, description,
+            control_id, risk_id, severity, dept, owner,
+            risk_impact, root_cause, recommendation,
+            discovery_date, due_date, status, remediation_plan,
+            remediation_progress, created_by, updated_by
+        ) VALUES (
+            #{findingNo}, #{findingType}, #{title}, #{description},
+            #{controlId}, #{riskId}, #{severity}, #{dept}, #{owner},
+            #{riskImpact}, #{rootCause}, #{recommendation},
+            #{discoveryDate}, #{dueDate}, #{status}, #{remediationPlan},
+            #{remediationProgress}, #{createdBy}, #{updatedBy}
+        )
+    </insert>
+
+    <update id="update" parameterType="Finding">
+        UPDATE itgc_finding SET
+            title                = #{title},
+            description          = #{description},
+            severity             = #{severity},
+            owner                = #{owner},
+            due_date             = #{dueDate},
+            status               = #{status},
+            remediation_plan     = #{remediationPlan},
+            remediation_progress = #{remediationProgress},
+            updated_by           = #{updatedBy}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateRemediation">
+        UPDATE itgc_finding SET
+            status               = #{status},
+            remediation_progress = #{remediationProgress},
+            remediation_plan     = #{remediationPlan}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM itgc_finding WHERE id = #{id}
+    </delete>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM itgc_finding
+    </select>
+
+    <select id="countByStatus" resultType="long">
+        SELECT COUNT(1) FROM itgc_finding WHERE status = #{status}
+    </select>
+
+    <select id="countOverdue" resultType="long">
+        SELECT COUNT(1) FROM itgc_finding
+        WHERE status IN ('미결','조치중') AND due_date &lt; #{today}
+    </select>
+
+    <select id="findOverdue" resultMap="FindingResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM itgc_finding
+        WHERE status IN ('미결','조치중') AND due_date &lt; #{today}
+        ORDER BY due_date
+    </select>
+
+    <select id="getSummaryBySeverity" resultType="map">
+        SELECT
+            severity,
+            COUNT(*)                                                        AS total,
+            SUM(CASE WHEN status = '미결'    THEN 1 ELSE 0 END)            AS open_count,
+            SUM(CASE WHEN status = '조치중'  THEN 1 ELSE 0 END)            AS in_progress_count,
+            SUM(CASE WHEN status = '조치완료' THEN 1 ELSE 0 END)           AS completed_count
+        FROM itgc_finding
+        GROUP BY severity
+        ORDER BY CASE severity
+            WHEN '심각' THEN 1 WHEN '높음' THEN 2
+            WHEN '중간' THEN 3 WHEN '낮음' THEN 4 ELSE 5 END
+    </select>
+
+</mapper>

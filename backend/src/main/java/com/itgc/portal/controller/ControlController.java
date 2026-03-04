@@ -1,7 +1,8 @@
 package com.itgc.portal.controller;
 
 import com.itgc.portal.common.ApiResponse;
-import com.itgc.portal.entity.Control;
+import com.itgc.portal.model.Control;
+import com.itgc.portal.model.RiskControlMapping;
 import com.itgc.portal.service.ControlService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,8 +60,26 @@ public class ControlController {
      * 위험-통제 매핑 조회
      */
     @GetMapping("/mapping")
-    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getControlMapping() {
+    public ResponseEntity<ApiResponse<List<RiskControlMapping>>> getControlMapping() {
         return ResponseEntity.ok(ApiResponse.success(controlService.getMapping()));
+    }
+
+    /**
+     * 위험-통제 매핑 추가
+     */
+    @PostMapping("/mapping")
+    public ResponseEntity<ApiResponse<Void>> addMapping(@RequestBody RiskControlMapping mapping) {
+        controlService.addMapping(mapping);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    /**
+     * 위험-통제 매핑 삭제
+     */
+    @DeleteMapping("/mapping/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteMapping(@PathVariable Long id) {
+        controlService.deleteMapping(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     /**

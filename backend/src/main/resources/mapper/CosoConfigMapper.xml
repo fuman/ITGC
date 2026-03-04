@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.CosoConfigMapper">
+
+    <resultMap id="CosoConfigResultMap" type="CosoConfig">
+        <id property="id" column="id"/>
+        <result property="component" column="component"/>
+        <result property="componentName" column="component_name"/>
+        <result property="weight" column="weight"/>
+        <result property="scoreGreen" column="score_green"/>
+        <result property="scoreYellow" column="score_yellow"/>
+        <result property="scoreRed" column="score_red"/>
+        <result property="description" column="description"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="CosoConfigResultMap">
+        SELECT id, component, component_name, weight,
+               score_green, score_yellow, score_red,
+               description, updated_at, updated_by
+        FROM itgc_coso_config
+        ORDER BY component
+    </select>
+
+    <select id="findByComponent" resultMap="CosoConfigResultMap">
+        SELECT id, component, component_name, weight,
+               score_green, score_yellow, score_red,
+               description, updated_at, updated_by
+        FROM itgc_coso_config
+        WHERE component = #{component}
+    </select>
+
+    <update id="update" parameterType="CosoConfig">
+        UPDATE itgc_coso_config SET
+            weight       = #{weight},
+            score_green  = #{scoreGreen},
+            score_yellow = #{scoreYellow},
+            score_red    = #{scoreRed},
+            description  = #{description},
+            updated_by   = #{updatedBy}
+        WHERE component = #{component}
+    </update>
+
+</mapper>

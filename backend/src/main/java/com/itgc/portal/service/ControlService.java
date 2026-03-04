@@ -1,7 +1,8 @@
 package com.itgc.portal.service;
 
-import com.itgc.portal.entity.Control;
-import com.itgc.portal.repository.ControlRepository;
+import com.itgc.portal.mapper.ControlMapper;
+import com.itgc.portal.model.Control;
+import com.itgc.portal.model.RiskControlMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,59 +16,62 @@ import java.util.NoSuchElementException;
 @Transactional(readOnly = true)
 public class ControlService {
 
-    private final ControlRepository controlRepository;
+    private final ControlMapper controlMapper;
 
     public List<Control> findAll(String domain, String type, String automation, String effectiveness) {
-        return controlRepository.findWithFilters(domain, type, automation, effectiveness);
+        return controlMapper.findAll(domain, type, automation, effectiveness);
     }
 
     public Control findById(Long id) {
-        return controlRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("통제를 찾을 수 없습니다: " + id));
+        Control control = controlMapper.findById(id);
+        if (control == null) throw new NoSuchElementException("통제를 찾을 수 없습니다: " + id);
+        return control;
     }
 
     @Transactional
     public Control create(Control control) {
-        return controlRepository.save(control);
+        controlMapper.insert(control);
+        return controlMapper.findById(control.getId());
     }
 
     @Transactional
     public Control update(Long id, Control control) {
-        Control existing = findById(id);
-        existing.setDomain(control.getDomain());
-        existing.setControlName(control.getControlName());
-        existing.setControlObjective(control.getControlObjective());
-        existing.setControlDescription(control.getControlDescription());
-        existing.setControlType(control.getControlType());
-        existing.setAutomation(control.getAutomation());
-        existing.setFrequency(control.getFrequency());
-        existing.setControlOwner(control.getControlOwner());
-        existing.setDept(control.getDept());
-        return controlRepository.save(existing);
+        findById(id);
+        control.setId(id);
+        controlMapper.update(control);
+        return controlMapper.findById(id);
     }
 
     @Transactional
     public void delete(Long id) {
-        controlRepository.deleteById(id);
+        findById(id);
+        controlMapper.delete(id);
     }
 
-    public List<Map<String, Object>> getMapping() {
-        return controlRepository.findControlRiskMapping();
+    public List<RiskControlMapping> getMapping() {
+        return controlMapper.findControlRiskMapping();
+    }
+
+    @Transactional
+    public void addMapping(RiskControlMapping mapping) {
+        controlMapper.insertMapping(mapping);
+    }
+
+    @Transactional
+    public void deleteMapping(Long id) {
+        controlMapper.deleteMapping(id);
     }
 
     @Transactional
     public void saveDesignEvaluation(List<Map<String, Object>> evaluations) {
         for (Map<String, Object> eval : evaluations) {
             Long controlId = Long.parseLong(eval.get("id").toString());
-            Control control = findById(controlId);
-            if (eval.containsKey("designAdequacy")) {
-                control.setDesignAdequacy(eval.get("designAdequacy").toString());
-            }
-            controlRepository.save(control);
+            String designAdequacy = eval.get("designAdequacy").toString();
+            controlMapper.updateDesignAdequacy(controlId, designAdequacy);
         }
     }
 
     public List<Map<String, Object>> getDomainSummary() {
-        return controlRepository.findDomainSummary();
+        return controlMapper.getDomainSummary();
     }
 }

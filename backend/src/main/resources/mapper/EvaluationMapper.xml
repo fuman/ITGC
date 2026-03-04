@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.EvaluationMapper">
+
+    <resultMap id="PlanResultMap" type="EvaluationPlan">
+        <id property="id" column="id"/>
+        <result property="evalYear" column="eval_year"/>
+        <result property="evalQuarter" column="eval_quarter"/>
+        <result property="controlId" column="control_id"/>
+        <result property="controlCode" column="control_code"/>
+        <result property="controlName" column="control_name"/>
+        <result property="domain" column="domain"/>
+        <result property="assignee" column="assignee"/>
+        <result property="plannedStartDate" column="planned_start_date"/>
+        <result property="plannedEndDate" column="planned_end_date"/>
+        <result property="actualStartDate" column="actual_start_date"/>
+        <result property="actualEndDate" column="actual_end_date"/>
+        <result property="samplingCount" column="sampling_count"/>
+        <result property="samplingMethod" column="sampling_method"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+    </resultMap>
+
+    <resultMap id="SampleResultMap" type="EvaluationSample">
+        <id property="id" column="id"/>
+        <result property="evalPlanId" column="eval_plan_id"/>
+        <result property="sampleNo" column="sample_no"/>
+        <result property="transactionId" column="transaction_id"/>
+        <result property="transactionDate" column="transaction_date"/>
+        <result property="description" column="description"/>
+        <result property="evidenceFile" column="evidence_file"/>
+        <result property="testResult" column="test_result"/>
+        <result property="exceptionReason" column="exception_reason"/>
+        <result property="tester" column="tester"/>
+        <result property="testDate" column="test_date"/>
+        <result property="remarks" column="remarks"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="ResultResultMap" type="EvaluationResult">
+        <id property="id" column="id"/>
+        <result property="evalPlanId" column="eval_plan_id"/>
+        <result property="totalSamples" column="total_samples"/>
+        <result property="passCount" column="pass_count"/>
+        <result property="exceptionCount" column="exception_count"/>
+        <result property="notApplicableCount" column="not_applicable_count"/>
+        <result property="conclusion" column="conclusion"/>
+        <result property="evaluatorOpinion" column="evaluator_opinion"/>
+        <result property="reviewerOpinion" column="reviewer_opinion"/>
+        <result property="reviewedBy" column="reviewed_by"/>
+        <result property="reviewedAt" column="reviewed_at"/>
+        <result property="approvedBy" column="approved_by"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+    </resultMap>
+
+    <!-- 평가 계획 -->
+    <select id="findAllPlans" resultMap="PlanResultMap">
+        SELECT
+            ep.id, ep.eval_year, ep.eval_quarter,
+            ep.control_id, c.control_code, c.control_name, c.domain,
+            ep.assignee, ep.planned_start_date, ep.planned_end_date,
+            ep.actual_start_date, ep.actual_end_date,
+            ep.sampling_count, ep.sampling_method, ep.status,
+            ep.created_at, ep.updated_at, ep.created_by
+        FROM itgc_eval_plan ep
+        JOIN itgc_control c ON c.id = ep.control_id
+        <where>
+            <if test="evalYear != null">
+                AND ep.eval_year = #{evalYear}
+            </if>
+            <if test="evalQuarter != null">
+                AND ep.eval_quarter = #{evalQuarter}
+            </if>
+            <if test="domain != null and domain != ''">
+                AND c.domain = #{domain}
+            </if>
+            <if test="status != null and status != ''">
+                AND ep.status = #{status}
+            </if>
+        </where>
+        ORDER BY ep.eval_year DESC, ep.eval_quarter, c.control_code
+    </select>
+
+    <select id="findPlanById" resultMap="PlanResultMap">
+        SELECT
+            ep.id, ep.eval_year, ep.eval_quarter,
+            ep.control_id, c.control_code, c.control_name, c.domain,
+            ep.assignee, ep.planned_start_date, ep.planned_end_date,
+            ep.actual_start_date, ep.actual_end_date,
+            ep.sampling_count, ep.sampling_method, ep.status,
+            ep.created_at, ep.updated_at, ep.created_by
+        FROM itgc_eval_plan ep
+        JOIN itgc_control c ON c.id = ep.control_id
+        WHERE ep.id = #{id}
+    </select>
+
+    <insert id="insertPlan" parameterType="EvaluationPlan" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_eval_plan (
+            eval_year, eval_quarter, control_id, assignee,
+            planned_start_date, planned_end_date, sampling_count, sampling_method,
+            status, created_by
+        ) VALUES (
+            #{evalYear}, #{evalQuarter}, #{controlId}, #{assignee},
+            #{plannedStartDate}, #{plannedEndDate}, #{samplingCount}, #{samplingMethod},
+            #{status}, #{createdBy}
+        )
+    </insert>
+
+    <update id="updatePlan" parameterType="EvaluationPlan">
+        UPDATE itgc_eval_plan SET
+            assignee           = #{assignee},
+            planned_start_date = #{plannedStartDate},
+            planned_end_date   = #{plannedEndDate},
+            actual_start_date  = #{actualStartDate},
+            actual_end_date    = #{actualEndDate},
+            sampling_count     = #{samplingCount},
+            sampling_method    = #{samplingMethod},
+            status             = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deletePlan">
+        DELETE FROM itgc_eval_plan WHERE id = #{id}
+    </delete>
+
+    <!-- 샘플 -->
+    <select id="findSamplesByPlanId" resultMap="SampleResultMap">
+        SELECT id, eval_plan_id, sample_no, transaction_id, transaction_date,
+               description, evidence_file, test_result, exception_reason,
+               tester, test_date, remarks, created_at, updated_at
+        FROM itgc_eval_sample
+        WHERE eval_plan_id = #{planId}
+        ORDER BY sample_no
+    </select>
+
+    <select id="findSampleById" resultMap="SampleResultMap">
+        SELECT id, eval_plan_id, sample_no, transaction_id, transaction_date,
+               description, evidence_file, test_result, exception_reason,
+               tester, test_date, remarks, created_at, updated_at
+        FROM itgc_eval_sample WHERE id = #{id}
+    </select>
+
+    <insert id="insertSample" parameterType="EvaluationSample" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_eval_sample (
+            eval_plan_id, sample_no, transaction_id, transaction_date,
+            description, evidence_file, test_result, exception_reason,
+            tester, test_date, remarks
+        ) VALUES (
+            #{evalPlanId}, #{sampleNo}, #{transactionId}, #{transactionDate},
+            #{description}, #{evidenceFile}, #{testResult}, #{exceptionReason},
+            #{tester}, #{testDate}, #{remarks}
+        )
+    </insert>
+
+    <update id="updateSample" parameterType="EvaluationSample">
+        UPDATE itgc_eval_sample SET
+            test_result      = #{testResult},
+            exception_reason = #{exceptionReason},
+            evidence_file    = #{evidenceFile},
+            tester           = #{tester},
+            test_date        = #{testDate},
+            remarks          = #{remarks}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteSample">
+        DELETE FROM itgc_eval_sample WHERE id = #{id}
+    </delete>
+
+    <!-- 결과 -->
+    <select id="findResultByPlanId" resultMap="ResultResultMap">
+        SELECT id, eval_plan_id, total_samples, pass_count,
+               exception_count, not_applicable_count, conclusion,
+               evaluator_opinion, reviewer_opinion,
+               reviewed_by, reviewed_at, approved_by, approved_at,
+               status, created_at, updated_at, created_by
+        FROM itgc_eval_result
+        WHERE eval_plan_id = #{planId}
+    </select>
+
+    <insert id="insertResult" parameterType="EvaluationResult" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_eval_result (
+            eval_plan_id, total_samples, pass_count,
+            exception_count, not_applicable_count, conclusion,
+            evaluator_opinion, status, created_by
+        ) VALUES (
+            #{evalPlanId}, #{totalSamples}, #{passCount},
+            #{exceptionCount}, #{notApplicableCount}, #{conclusion},
+            #{evaluatorOpinion}, #{status}, #{createdBy}
+        )
+    </insert>
+
+    <update id="updateResult" parameterType="EvaluationResult">
+        UPDATE itgc_eval_result SET
+            total_samples        = #{totalSamples},
+            pass_count           = #{passCount},
+            exception_count      = #{exceptionCount},
+            not_applicable_count = #{notApplicableCount},
+            conclusion           = #{conclusion},
+            evaluator_opinion    = #{evaluatorOpinion},
+            reviewer_opinion     = #{reviewerOpinion},
+            reviewed_by          = #{reviewedBy},
+            reviewed_at          = #{reviewedAt},
+            approved_by          = #{approvedBy},
+            approved_at          = #{approvedAt},
+            status               = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 통계 -->
+    <select id="getQuarterlySummary" resultType="map">
+        SELECT
+            ep.eval_quarter                                                             AS quarter,
+            COUNT(ep.id)                                                                AS total,
+            SUM(CASE WHEN ep.status = '완료' THEN 1 ELSE 0 END)                        AS completed,
+            SUM(CASE WHEN ep.status = '진행중' THEN 1 ELSE 0 END)                      AS in_progress,
+            SUM(CASE WHEN ep.status = '예정' THEN 1 ELSE 0 END)                        AS planned,
+            SUM(CASE WHEN er.conclusion = '효과적' THEN 1 ELSE 0 END)                  AS effective,
+            SUM(CASE WHEN er.conclusion = '부분효과적' THEN 1 ELSE 0 END)              AS partial,
+            SUM(CASE WHEN er.conclusion = '비효과적' THEN 1 ELSE 0 END)                AS ineffective
+        FROM itgc_eval_plan ep
+        LEFT JOIN itgc_eval_result er ON er.eval_plan_id = ep.id
+        WHERE ep.eval_year = #{evalYear}
+        GROUP BY ep.eval_quarter
+        ORDER BY ep.eval_quarter
+    </select>
+
+    <select id="getDomainEffectiveness" resultType="map">
+        SELECT
+            c.domain,
+            COUNT(ep.id)                                                                AS total,
+            SUM(CASE WHEN er.conclusion = '효과적'    THEN 1 ELSE 0 END)               AS effective,
+            SUM(CASE WHEN er.conclusion = '부분효과적' THEN 1 ELSE 0 END)              AS partial,
+            SUM(CASE WHEN er.conclusion = '비효과적'  THEN 1 ELSE 0 END)              AS ineffective,
+            ROUND(
+                SUM(CASE WHEN er.conclusion = '효과적' THEN 1 ELSE 0 END)::NUMERIC
+                / NULLIF(COUNT(ep.id), 0) * 100, 1
+            )                                                                           AS effectiveness_rate
+        FROM itgc_eval_plan ep
+        JOIN itgc_control c ON c.id = ep.control_id
+        LEFT JOIN itgc_eval_result er ON er.eval_plan_id = ep.id
+        WHERE ep.eval_year = #{evalYear}
+        GROUP BY c.domain
+        ORDER BY c.domain
+    </select>
+
+</mapper>

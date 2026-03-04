@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.DashboardMapper">
+
+    <select id="getKpiSummary" resultType="map">
+        SELECT
+            (SELECT COUNT(*) FROM itgc_risk)                                        AS total_risks,
+            (SELECT COUNT(*) FROM itgc_risk WHERE inherent_risk IN ('심각','높음'))  AS high_risks,
+            (SELECT COUNT(*) FROM itgc_control)                                     AS total_controls,
+            (SELECT COUNT(*) FROM itgc_control WHERE effectiveness = '효과적')      AS effective_controls,
+            (SELECT COUNT(*) FROM itgc_finding WHERE status IN ('미결','조치중'))   AS open_findings,
+            (SELECT COUNT(*) FROM itgc_finding
+             WHERE status IN ('미결','조치중') AND due_date &lt; CURRENT_DATE)      AS overdue_findings,
+            (SELECT COUNT(*) FROM itgc_eval_plan
+             WHERE eval_year = EXTRACT(YEAR FROM CURRENT_DATE))                     AS current_year_evals,
+            (SELECT COUNT(*) FROM itgc_eval_plan
+             WHERE eval_year = EXTRACT(YEAR FROM CURRENT_DATE)
+               AND status = '완료')                                                  AS completed_evals
+    </select>
+
+    <select id="getRiskDistribution" resultType="map">
+        SELECT
+            inherent_risk AS level,
+            COUNT(*)      AS count
+        FROM itgc_risk
+        GROUP BY inherent_risk
+        ORDER BY CASE inherent_risk
+            WHEN '심각' THEN 1 WHEN '높음' THEN 2
+            WHEN '중간' THEN 3 WHEN '낮음' THEN 4 ELSE 5 END
+    </select>
+
+    <select id="getControlEffectiveness" resultType="map">
+        SELECT
+            domain,
+            ROUND(
+                SUM(CASE WHEN effectiveness = '효과적' THEN 1 ELSE 0 END)::NUMERIC
+                / NULLIF(COUNT(*), 0) * 100, 1
+            ) AS effectiveness_rate,
+            COUNT(*) AS total
+        FROM itgc_control
+        GROUP BY domain
+        ORDER BY domain
+    </select>
+
+    <select id="getEvalTrend" resultType="map">
+        SELECT
+            ep.eval_quarter                                                           AS quarter,
+            COUNT(ep.id)                                                              AS total,
+            SUM(CASE WHEN er.conclusion = '효과적'    THEN 1 ELSE 0 END)             AS effective,
+            SUM(CASE WHEN er.conclusion = '부분효과적' THEN 1 ELSE 0 END)            AS partial,
+            SUM(CASE WHEN er.conclusion = '비효과적'  THEN 1 ELSE 0 END)            AS ineffective,
+            ROUND(
+                SUM(CASE WHEN er.conclusion = '효과적' THEN 1 ELSE 0 END)::NUMERIC
+                / NULLIF(COUNT(ep.id), 0) * 100, 1
+            )                                                                         AS effectiveness_rate
+        FROM itgc_eval_plan ep
+        LEFT JOIN itgc_eval_result er ON er.eval_plan_id = ep.id
+        WHERE ep.eval_year = #{year}
+        GROUP BY ep.eval_quarter
+        ORDER BY ep.eval_quarter
+    </select>
+
+    <select id="getRecentFindings" resultType="map">
+        SELECT
+            f.id, f.finding_no, f.title, f.severity, f.status,
+            f.dept, f.owner, f.due_date, f.discovery_date,
+            f.remediation_progress
+        FROM itgc_finding f
+        ORDER BY f.created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="getCosoScores" resultType="map">
+        SELECT
+            cc.component,
+            cc.component_name,
+            cc.weight,
+            COALESCE(
+                ROUND(
+                    (SELECT AVG(
+                        CASE er.conclusion
+                            WHEN '효과적'    THEN 100
+                            WHEN '부분효과적' THEN 60
+                            WHEN '비효과적'  THEN 20
+                            ELSE NULL
+                        END
+                    )
+                    FROM itgc_eval_plan ep
+                    JOIN itgc_control c ON c.id = ep.control_id
+                    LEFT JOIN itgc_eval_result er ON er.eval_plan_id = ep.id
+                    WHERE ep.eval_year = EXTRACT(YEAR FROM CURRENT_DATE)
+                    ), 1
+                ),
+                0
+            ) AS score
+        FROM itgc_coso_config cc
+        ORDER BY cc.component
+    </select>
+
+    <select id="getOverdueFindingsSummary" resultType="map">
+        SELECT
+            severity,
+            COUNT(*) AS count,
+            MIN(due_date) AS earliest_due,
+            MAX(due_date) AS latest_due
+        FROM itgc_finding
+        WHERE status IN ('미결','조치중') AND due_date &lt; CURRENT_DATE
+        GROUP BY severity
+        ORDER BY CASE severity
+            WHEN '심각' THEN 1 WHEN '높음' THEN 2
+            WHEN '중간' THEN 3 WHEN '낮음' THEN 4 ELSE 5 END
+    </select>
+
+</mapper>

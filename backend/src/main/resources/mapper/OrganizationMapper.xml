@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itgc.portal.mapper.OrganizationMapper">
+
+    <resultMap id="OrgResultMap" type="Organization">
+        <id property="id" column="id"/>
+        <result property="orgCode" column="org_code"/>
+        <result property="orgName" column="org_name"/>
+        <result property="orgType" column="org_type"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="parentName" column="parent_name"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="UserResultMap" type="User">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="orgId" column="org_id"/>
+        <result property="orgName" column="org_name"/>
+        <result property="role" column="role"/>
+        <result property="isActive" column="is_active"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findAllOrgs" resultMap="OrgResultMap">
+        SELECT
+            o.id, o.org_code, o.org_name, o.org_type,
+            o.parent_id, p.org_name AS parent_name,
+            o.sort_order, o.is_active, o.created_at, o.updated_at
+        FROM itgc_organization o
+        LEFT JOIN itgc_organization p ON p.id = o.parent_id
+        ORDER BY o.sort_order, o.org_code
+    </select>
+
+    <select id="findOrgById" resultMap="OrgResultMap">
+        SELECT
+            o.id, o.org_code, o.org_name, o.org_type,
+            o.parent_id, p.org_name AS parent_name,
+            o.sort_order, o.is_active, o.created_at, o.updated_at
+        FROM itgc_organization o
+        LEFT JOIN itgc_organization p ON p.id = o.parent_id
+        WHERE o.id = #{id}
+    </select>
+
+    <insert id="insertOrg" parameterType="Organization" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_organization (org_code, org_name, org_type, parent_id, sort_order, is_active)
+        VALUES (#{orgCode}, #{orgName}, #{orgType}, #{parentId}, #{sortOrder}, #{isActive})
+    </insert>
+
+    <update id="updateOrg" parameterType="Organization">
+        UPDATE itgc_organization SET
+            org_name   = #{orgName},
+            org_type   = #{orgType},
+            parent_id  = #{parentId},
+            sort_order = #{sortOrder},
+            is_active  = #{isActive}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteOrg">
+        DELETE FROM itgc_organization WHERE id = #{id}
+    </delete>
+
+    <!-- 사용자 -->
+    <select id="findAllUsers" resultMap="UserResultMap">
+        SELECT
+            u.id, u.user_id, u.username, u.email, u.phone,
+            u.org_id, o.org_name, u.role, u.is_active,
+            u.last_login_at, u.created_at, u.updated_at
+        FROM itgc_user u
+        LEFT JOIN itgc_organization o ON o.id = u.org_id
+        <where>
+            <if test="orgId != null">
+                AND u.org_id = #{orgId}
+            </if>
+            <if test="role != null and role != ''">
+                AND u.role = #{role}
+            </if>
+        </where>
+        ORDER BY u.username
+    </select>
+
+    <select id="findUserById" resultMap="UserResultMap">
+        SELECT
+            u.id, u.user_id, u.username, u.email, u.phone,
+            u.org_id, o.org_name, u.role, u.is_active,
+            u.last_login_at, u.created_at, u.updated_at
+        FROM itgc_user u
+        LEFT JOIN itgc_organization o ON o.id = u.org_id
+        WHERE u.id = #{id}
+    </select>
+
+    <select id="findByUserId" resultMap="UserResultMap">
+        SELECT id, user_id, username, password, email, phone,
+               org_id, role, is_active, last_login_at, created_at, updated_at
+        FROM itgc_user
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO itgc_user (user_id, username, password, email, phone, org_id, role, is_active)
+        VALUES (#{userId}, #{username}, #{password}, #{email}, #{phone}, #{orgId}, #{role}, #{isActive})
+    </insert>
+
+    <update id="updateUser" parameterType="User">
+        UPDATE itgc_user SET
+            username  = #{username},
+            email     = #{email},
+            phone     = #{phone},
+            org_id    = #{orgId},
+            role      = #{role},
+            is_active = #{isActive}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUser">
+        DELETE FROM itgc_user WHERE id = #{id}
+    </delete>
+
+</mapper>

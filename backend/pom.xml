@@ -28,10 +28,18 @@
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
-    <!-- Spring Boot JPA -->
+    <!-- MyBatis Spring Boot Starter (spring-jdbc + HikariCP 포함) -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <groupId>org.mybatis.spring.boot</groupId>
+      <artifactId>mybatis-spring-boot-starter</artifactId>
+      <version>3.0.3</version>
+    </dependency>
+
+    <!-- PageHelper (페이징 처리) -->
+    <dependency>
+      <groupId>com.github.pagehelper</groupId>
+      <artifactId>pagehelper-spring-boot-starter</artifactId>
+      <version>2.1.0</version>
     </dependency>
 
     <!-- Spring Boot Validation -->
@@ -65,18 +73,17 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- H2 Database (개발용) -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>runtime</scope>
-    </dependency>
-
-    <!-- PostgreSQL (운영용) -->
+    <!-- PostgreSQL JDBC Driver -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+
+    <!-- HikariCP (spring-boot-starter-jdbc 에 포함되어 있으나 명시적 선언) -->
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
     </dependency>
 
     <!-- Lombok -->
@@ -84,14 +91,6 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
-    </dependency>
-
-    <!-- QueryDSL -->
-    <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-jpa</artifactId>
-      <version>5.1.0</version>
-      <classifier>jakarta</classifier>
     </dependency>
 
     <!-- Spring Boot DevTools -->
@@ -111,6 +110,12 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mybatis.spring.boot</groupId>
+      <artifactId>mybatis-spring-boot-starter-test</artifactId>
+      <version>3.0.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
